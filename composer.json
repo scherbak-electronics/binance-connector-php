@@ -1,7 +1,7 @@
 {
-    "name": "binance/binance-connector-php",
-    "description": "A thin layer for Binance API in PHP",
-    "homepage": "https://github.com/binance/binance-connector-php",
+    "name": "scherbak-electronics/binance-connector-php",
+    "description": "A customized fork of Binance Connector PHP for personal or extended use",
+    "homepage": "https://github.com/scherbak-electronics/binance-connector-php",
     "type": "library",
     "minimum-stability": "stable",
     "license": "MIT",
@@ -9,6 +9,10 @@
         {
             "name": "Binance",
             "email": "contact@binance.com"
+        },
+        {
+            "name": "Scherbak Electronics",
+            "email": "your-email@example.com"
         }
     ],
     "require": {
@@ -40,5 +44,4 @@
         "lint-fix": "php-cs-fixer fix --using-cache=no --config=.php-cs-fixer.php -v .",
         "analyze": "phan --allow-polyfill-parser"
     }
-
 }
