@@ -5,22 +5,27 @@ namespace Binance;
 use Psr\Log\NullLogger;
 use Ratchet\RFC6455\Messaging\Frame;
 use Binance\Exception\InvalidArgumentException;
+use function Ratchet\Client\connect;
 
 abstract class Websocket
 {
-    protected $baseURL;
+    protected string $baseURL;
     protected $logger;
     protected $wsConnector;
     public $wsConnection;
+    protected string $apiKey;
+    protected string $secretKey;
 
     public function __construct($args = array())
     {
         $this->logger  = $args['logger'] ?? new NullLogger();
         $this->baseURL = $args['baseURL'];
         $this->wsConnector = $args['wsConnector'] ?? null;
+        $this->apiKey  = $args['apiKey'] ?? null;
+        $this->secretKey = $args['secretKey'] ?? null;
     }
 
-    public function ping()
+    public function ping(): void
     {
         if ($this->wsConnection) {
             $this->wsConnection->send(new Frame('', true, Frame::OP_PING));
@@ -33,8 +38,9 @@ abstract class Websocket
      * $callback can be used:
      *   - if it's function, it will be used to process the `message` event.
      *   - if it's an array, it's required to specific the event type for each function. e.g. ['message' => function(){}, 'ping' => function(){}]
+     * @throws InvalidArgumentException
      */
-    protected function handleCallBack($url, $callback)
+    protected function handleCallBack($url, $callback): void
     {
         if (is_array($callback)) {
             foreach ($callback as $event => $func) {
@@ -72,7 +78,28 @@ abstract class Websocket
         if ($this->wsConnector) {
             return call_user_func($this->wsConnector, $url);
         } else {
-            return \Ratchet\Client\connect($url);
+            return connect($url);
+        }
+    }
+
+    protected function sendSignedRequest($method, $params): void
+    {
+        $timestamp = round(microtime(true) * 1000);
+        $params['timestamp'] = $timestamp;
+        $query = http_build_query($params);
+        $signature = hash_hmac('sha256', $query, $this->secretKey);
+        $params['signature'] = $signature;
+
+        $request = [
+            'id' => uniqid(),
+            'method' => $method,
+            'params' => array_merge($params, ['apiKey' => $this->apiKey])
+        ];
+
+        if ($this->wsConnection) {
+            $this->wsConnection->send(json_encode($request));
+        } else {
+            $this->logger->warning("WebSocket connection is not established. Request cannot be sent.");
         }
     }
 }

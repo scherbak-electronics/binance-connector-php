@@ -11,4 +11,10 @@ class Futures extends Spot
         $args['baseURL'] = $args['baseURL'] ?? 'wss://fstream.binance.com';
         parent::__construct($args);
     }
+
+    public function requestPositionInfo($symbol): void
+    {
+        $params = ['symbol' => $symbol];
+        $this->sendSignedRequest('account.position', $params);
+    }
 }
