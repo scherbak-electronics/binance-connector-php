@@ -1,13 +1,14 @@
 # Binance Connector PHP
 
-This is a thin library that working as a connector to the Binance public API.
+This is Scherbak Electronics extended library that working as a connector to the Binance public API.
+It supports some of the futures REST and WebSocket API as well as spot!
 
 
 ## Installation
 
 ```php
 
-composer require binance/binance-connector-php
+composer require scherbak-electronics/binance-connector-php
 
 ```
 
@@ -174,6 +175,13 @@ $reactConnector = new \React\Socket\Connector($loop);
 $connector = new \Ratchet\Client\Connector($loop, $reactConnector);
 $client = new \Binance\Websocket\Spot(['wsConnector' => $connector]);
 
+// or you can create a Futures client:
+$client = new \Binance\Websocket\Futures([
+                    'wsConnector' => $connector,
+                    'apiKey' => env('BINANCE_API_KEY'),
+                    'secretKey' => env('BINANCE_SECRET')
+                ]);
+
 $callbacks = [
     'message' => function($conn, $msg){
         echo "received message".PHP_EOL;
@@ -211,6 +219,16 @@ $client->combined([
 
 ```
 
+Or you can listen to futures streams:
+```php
+
+$client->ticker($callbacks);
+$client->userData($listenKey, $callbacks);
+
+```
+
+NOTE: you have to get listen key manually (see Binance [futures API documentation](https://binance-docs.github.io/apidocs/futures/en/))
+
 ## Test
 
 ```shell
@@ -222,9 +240,8 @@ vendor/bin/phpunit
 ```
 
 ## Limitation
-Futures and Vanilla Options APIs are not supported:
+Vanilla Options APIs are not supported:
 
-- /fapi/*
 - /dapi/*
 - /vapi/*
 - Associated Websocket Market and User Data Streams
