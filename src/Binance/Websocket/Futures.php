@@ -1,8 +1,6 @@
 <?php
-
+// This is Futures WebSocket API
 namespace Binance\Websocket;
-
-use Binance\Websocket;
 
 class Futures extends Spot
 {
@@ -16,5 +14,25 @@ class Futures extends Spot
     {
         $params = ['symbol' => $symbol];
         $this->sendSignedRequest('account.position', $params);
+    }
+
+
+    public function startUserDataStream(): void
+    {
+        $params = [
+            'apiKey' => $this->apiKey,
+        ];
+
+        $request = [
+            'id' => uniqid(),
+            'method' => 'userDataStream.start',
+            'params' => $params
+        ];
+
+        if ($this->wsConnection) {
+            $this->wsConnection->send(json_encode($request));
+        } else {
+            $this->logger->warning("WebSocket connection is not established. Request cannot be sent.");
+        }
     }
 }

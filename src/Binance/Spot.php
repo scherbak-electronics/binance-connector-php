@@ -1,5 +1,5 @@
 <?php
-
+// This is Spot REST API
 namespace Binance;
 
 use Binance\APIClient;

@@ -82,6 +82,21 @@ abstract class Websocket
         }
     }
 
+    protected function sendRequest($method, $params): void
+    {
+        $request = [
+            'id' => uniqid(),
+            'method' => $method,
+            'params' => $params
+        ];
+
+        if ($this->wsConnection) {
+            $this->wsConnection->send(json_encode($request));
+        } else {
+            $this->logger->warning("WebSocket connection is not established. Request cannot be sent.");
+        }
+    }
+
     protected function sendSignedRequest($method, $params): void
     {
         $timestamp = round(microtime(true) * 1000);
